@@ -113,7 +113,6 @@ public class ThreadStatus {
         System.out.printf("t1 state:%s,isAlive:%s,isInterrupt:%s\n", t1.getState(), t1.isAlive(), t1.isInterrupted());
         System.out.printf("t2 state:%s,isAlive:%s,isInterrupt:%s\n", t2.getState(), t2.isAlive(), t2.isInterrupted());
 
-
     }
 }
 

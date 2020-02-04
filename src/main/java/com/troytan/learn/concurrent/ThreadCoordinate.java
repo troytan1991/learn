@@ -1,9 +1,6 @@
 package com.troytan.learn.concurrent;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Vector;
+import java.util.*;
 import java.util.concurrent.*;
 
 /**
@@ -18,7 +15,6 @@ import java.util.concurrent.*;
  * @Date 2/3/2020
  */
 public class ThreadCoordinate {
-    private Vector<String> result = new Vector<>();
 
     private Random random = new Random();
 
@@ -28,10 +24,11 @@ public class ThreadCoordinate {
      * 2）子线程执行完run方法，自动调用线程对象的notifyAll方法，唤醒主线程
      * 3）主线程继续等待下一线程执行完
      *
+     * @return
      * @throws InterruptedException
      */
-    public void waitWithJoin() throws InterruptedException {
-        result.clear();
+    public Vector<String> waitWithJoin() throws InterruptedException {
+        Vector<String> result = new Vector<>();
         List<Thread> threads = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             Thread t = new Thread(() -> {
@@ -51,18 +48,19 @@ public class ThreadCoordinate {
             //1）若t已经结束（isAlive()=false）直接返回
             //2）否则进入t.wait(), 线程t在执行完run方法后，会自行调用t.notify()，主线程会被唤醒
             t.join();
-            System.out.println("等待线程" + t.getName() + "完成");
         }
-        System.out.println("------join 主线程执行结束-----");
+        return result;
     }
 
     /**
      * FutureTask方式
      * 1）生成FutureTask，新建线程执行task
      * 2）futureTask.get()阻塞获取结果
+     *
+     * @return
      */
-    public void waitWithFutureTask() throws ExecutionException, InterruptedException {
-        result.clear();
+    public Vector<String> waitWithFutureTask() throws ExecutionException, InterruptedException {
+        Vector<String> result = new Vector<>();
         List<FutureTask<String>> tasks = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             FutureTask<String> ft = new FutureTask<>(() -> Thread.currentThread().getName());
@@ -73,7 +71,7 @@ public class ThreadCoordinate {
             //阻塞直到线程执行task完成
             result.add(ft.get());
         }
-        System.out.println("------futureTask 主线程执行结束-----");
+        return result;
     }
 
     /**
@@ -81,10 +79,11 @@ public class ThreadCoordinate {
      * 1）每个线程执行完后，latch.countDown()
      * 2）主线程latch.await(),阻塞等待latch为0
      *
+     * @return
      * @throws InterruptedException
      */
-    public void waitWithLatch() throws InterruptedException {
-        result.clear();
+    public Vector<String> waitWithLatch() throws InterruptedException {
+        Vector<String> result = new Vector<>();
         CountDownLatch latch = new CountDownLatch(5);
         for (int i = 0; i < 5; i++) {
             new Thread(() -> {
@@ -95,7 +94,8 @@ public class ThreadCoordinate {
         }
         //阻塞等待直到latch为0
         latch.await();
-        System.out.println("------latch 主线程执行结束-----");
+
+        return result;
     }
 
     /**
@@ -103,11 +103,12 @@ public class ThreadCoordinate {
      * 1）所有线程执行完后，进入await等待
      * 2）当barrier的await数量达到预定值，所有线程同时唤醒
      *
+     * @return
      * @throws BrokenBarrierException
      * @throws InterruptedException
      */
-    public void waitWithCyclicBarrier() throws BrokenBarrierException, InterruptedException {
-        result.clear();
+    public Vector<String> waitWithCyclicBarrier() throws BrokenBarrierException, InterruptedException {
+        Vector<String> result = new Vector<>();
         CyclicBarrier barrier = new CyclicBarrier(6);
         for (int i = 0; i < 5; i++) {
             new Thread(() -> {
@@ -122,7 +123,7 @@ public class ThreadCoordinate {
         }
         //barrier等待数量为6时，主线程和子线程同时唤醒
         barrier.await();
-        System.out.println("------barrier 主线程执行结束-----");
+        return result;
     }
 
     /**
@@ -130,10 +131,11 @@ public class ThreadCoordinate {
      * 1）每个线程执行完后放入一个令牌
      * 2）主线程等待一次性获取5个令牌
      *
+     * @return
      * @throws InterruptedException
      */
-    public void waitWithSemaphore() throws InterruptedException {
-        result.clear();
+    public Vector<String> waitWithSemaphore() throws InterruptedException {
+        Vector<String> result = new Vector<>();
         //初始化令牌池为0
         Semaphore semaphore = new Semaphore(0);
         for (int i = 0; i < 5; i++) {
@@ -145,17 +147,6 @@ public class ThreadCoordinate {
         }
         //阻塞等待信号量为5
         semaphore.acquire(5);
-        System.out.println(result);
-        System.out.println("------semaphore主线程执行结束-----");
+        return result;
     }
-
-    public static void main(String[] args) throws Exception {
-        ThreadCoordinate coordinate = new ThreadCoordinate();
-        coordinate.waitWithJoin();
-        coordinate.waitWithLatch();
-        coordinate.waitWithFutureTask();
-        coordinate.waitWithCyclicBarrier();
-        coordinate.waitWithSemaphore();
-    }
-
 }

@@ -8,10 +8,14 @@ package com.troytan.learn.classload;
  */
 public class ClassLoaderOrder extends Parent {
 
+    //实例化对象时，在构造方法执行前进行赋值
     private Member member = new Member();
+    //静态成员变量，在类加载时进行赋值
     public static StaticMember staticMember = new StaticMember();
+    //静态常量，为基本数据类型时，在编译时进入常量池，调用时不需要先加载类
     public final static String NAME = "TROY";
     public static String AGE = "19";
+
 
     static {
         System.out.println("子类加载");
