@@ -15,16 +15,6 @@ import java.util.stream.Collectors;
  */
 public class TaskSchedual {
 
-    public static void main(String[] args) throws Exception {
-        TaskSchedual taskSchedual = new TaskSchedual();
-        //T1->T2表示T1依赖T2任务执行完成
-        String input1 = "T1->T2,T2->T3,T2->T4,T3->T4,T4->T5,T6";
-        String input2 = "T1->T2,T2->T3,T3->T1";
-        String input3 = "K1,K2";
-        List<GraphNode> nodes = taskSchedual.sortTask(input1);
-        System.out.println(nodes.stream().map(node -> node.getId()).collect(Collectors.joining(",")));
-    }
-
     /**
      * 实现方法
      *
