@@ -91,6 +91,70 @@ public class Calculator {
         return result;
     }
 
+    /**
+     * 计算+-/*()的四则运算
+     * 1）利用栈，实现中缀表达式->后缀表达式的转化
+     * 2）再使用一个栈，计算后缀表达式即可（遇数字入栈，与符号栈顶两元素出栈运算，将结果入栈）
+     * 3）此处用一个queue存储后缀结果，以便观察原理，实际可以只用两个栈计算，不用存储中间的后缀表达式
+     *
+     * @param input
+     * @return
+     */
+    public int calculate3(String input) {
+        int length = input.length();
+        Queue<Object> queue = new ArrayDeque<>();
+        Stack<Character> operatorS = new Stack<>();
+        Stack<Integer> dataStack = new Stack<>();
+        for (int i = 0; i < length; i++) {
+            char c = input.charAt(i);
+            if (Character.isDigit(c)) {
+                int num = c - '0';
+                while (i + 1 < length && Character.isDigit(input.charAt(i + 1))) {
+                    num = 10 * num + (input.charAt(++i) - '0');
+                }
+                queue.offer(num);
+            } else if (c == '(' || operatorS.isEmpty() || comparePriority(c, operatorS.peek()) > 0) {
+                //直接入栈的几种场景：
+                //1)左括号 2)符号优先级大于栈顶--栈顶左括号直接入栈，优先级最低 3)栈为空
+                operatorS.push(c);
+            } else if (c == ')') {
+                //右括号时，弹出所有符号，直到遇到左括号
+                char temp;
+                while ((temp = operatorS.pop()) != '(') {
+                    queue.offer(temp);
+                }
+            } else {
+                //c符号优先级<=栈顶，弹出栈顶，再入栈c
+                queue.offer(operatorS.pop());
+                operatorS.push(c);
+            }
+        }
+        //符号栈全部出栈
+        while (!operatorS.isEmpty()) {
+            queue.offer(operatorS.pop());
+        }
+        //利用数据栈，计算queue中的后缀表达式
+        while (!queue.isEmpty()) {
+            Object e = queue.poll();
+            if (e instanceof Integer) {
+                dataStack.push((Integer) e);
+            } else {
+                dataStack.push(calc(dataStack.pop(), dataStack.pop(), (char) e));
+            }
+        }
+
+        return dataStack.pop();
+    }
+
+
+    /**
+     * 计算两者的运算
+     *
+     * @param a
+     * @param b
+     * @param operator
+     * @return
+     */
     private int calc(int a, int b, char operator) {
         switch (operator) {
             case '+':
@@ -105,10 +169,47 @@ public class Calculator {
         return 0;
     }
 
+    /**
+     * 比较符号优先级
+     *
+     * @param operator1
+     * @param operator2
+     * @return
+     */
+    private int comparePriority(char operator1, char operator2) {
+        if (operator2 == '(') {
+            //左括号，优先级最低
+            return 1;
+        }
+        if (charIn(operator1, '*', '/')) {
+            if (charIn(operator2, '*', '/')) {
+                return 0;
+            } else {
+                return 1;
+            }
+        } else {
+            if (charIn(operator2, '*', '/')) {
+                return -1;
+            } else {
+                return 0;
+            }
+        }
+    }
+
+    private boolean charIn(char c, char... chars) {
+        for (char aChar : chars) {
+            if (c == aChar) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static void main(String[] args) {
         Calculator calculator = new Calculator();
         String input = "10 +( 2 - (5 + 16-(1+1)))";
         System.out.println(calculator.calculate1(input));
         System.out.println(calculator.calculate2("10*2 -9/3*3+5-7"));
+        System.out.println(calculator.calculate3("1+((2/2+3)*4)-5+(1-2)"));
     }
 }
