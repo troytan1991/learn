@@ -1,5 +1,7 @@
 package com.troytan.learn.concurrent;
 
+import com.troytan.learn.support.Singleton;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -66,13 +68,3 @@ public class DoubleCheck {
     }
 }
 
-class Singleton {
-    //记录构造方法调用次数
-    public static AtomicInteger count = new AtomicInteger(0);
-    //测试对象能否正常使用
-    public String name = "troy";
-
-    public Singleton() {
-        count.incrementAndGet();
-    }
-}
